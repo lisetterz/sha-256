@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"fmt"
 	"os"
 	"regexp"
@@ -27,11 +28,13 @@ func main() {
 
 	valid := validateString(text)
 
-	if valid {
-		fmt.Println("The string is valid")
-	} else {
+	if !valid {
 		fmt.Println("The string is invalid")
 	}
+
+	sha256 := convertToSha256(text)
+
+	fmt.Printf("%x\n", sha256)
 
 }
 
@@ -63,4 +66,12 @@ func validateString(s string) bool {
 	}
 
 	return false
+}
+
+func convertToSha256(s string) []byte {
+	h := sha256.New()
+	h.Write([]byte(s))
+	bs := h.Sum(nil)
+
+	return bs
 }
