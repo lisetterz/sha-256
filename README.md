@@ -1,6 +1,6 @@
 # sha-256
 
-This API receives and input strings and validates it's format, if the string is valid it returns the sha256 from the string.
+This API receives and input strings and validates it's format, it returns a sha 256 hash for a given string if and only if said string consists of at least 8 characters, at least one number, and at least one special character.
 
 # Dependencies
 Go 1.20
@@ -15,7 +15,14 @@ The RESTFul API code is written in Go and resides in an AWS Lambda function. It 
 For more details you can find the OpenAPI here.
 
 ## Input format
-The input formate is a json that follows the below schema. You should enter the string value that you want to convert into the text parameter.
+The input formate is a json that follows the below schema like below.
+```
+{
+    "text": "dfrff@34"
+}
+```
+
+You should enter the string value that you want to convert into the text parameter.
 
 Send a POST request with the json body to the endpoint below.
 ```
