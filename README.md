@@ -12,7 +12,7 @@ The RESTFul API code is written in Go and resides in an AWS Lambda function. It 
 
 # How to test
 
-For more details you can find the OpenAPI here.
+For more details you can find the OpenAPI [here](convertToSha256-API.yaml).
 
 ## Input format
 The input formate is a json that follows the below schema like below.

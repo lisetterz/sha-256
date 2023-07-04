@@ -1,0 +1,76 @@
+openapi: "3.0.1"
+info:
+  title: "convertToSha256-API"
+  version: "2023-07-04T09:09:47Z"
+servers:
+- url: "https://m1wodb0p3d.execute-api.us-east-2.amazonaws.com/{basePath}"
+  variables:
+    basePath:
+      default: "default"
+paths:
+  /convertToSha256:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/inputText"
+        required: true
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sha256Response"
+    options:
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+    x-amazon-apigateway-any-method:
+      responses:
+        "200":
+          description: "200 response"
+          content: {}
+      security:
+      - api_key: []
+components:
+  schemas:
+    Empty:
+      title: "Empty Schema"
+      type: "object"
+    sha256Response:
+      title: "API Response Schema"
+      type: "object"
+      properties:
+        sha256:
+          type: "string"
+    inputText:
+      title: "Input Schema"
+      type: "object"
+      properties:
+        text:
+          type: "string"
+  securitySchemes:
+    api_key:
+      type: "apiKey"
+      name: "x-api-key"
+      in: "header"
