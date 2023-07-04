@@ -47,13 +47,17 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		return events.APIGatewayProxyResponse{}, err
 	}
 
-	isValid := validateString(myEvent.Text)
+	isValid, err := validateString(myEvent.Text)
+
+	if err != nil {
+		return events.APIGatewayProxyResponse{}, err
+	}
 
 	if !isValid {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
-			Body:       "",
-		}, fmt.Errorf("the string %s from the event %s is not valid", myEvent.Text, myEvent)
+			Body:       fmt.Sprintf("the string %s from the event %s is not valid", myEvent.Text, myEvent),
+		}, nil
 
 	}
 
@@ -79,30 +83,30 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 
 }
 
-func validateString(s string) bool {
+func validateString(s string) (bool, error) {
 
 	matched, err := regexp.MatchString(pattern, s)
 
 	if err != nil {
-		panic(err)
+		return false, err
 	}
 	number, err := regexp.MatchString(oneNumber, s)
 
 	if err != nil {
-		panic(err)
+		return false, err
 	}
 
 	special, err := regexp.MatchString(oneSpecial, s)
 
 	if err != nil {
-		panic(err)
+		return false, err
 	}
 
 	if matched && number && special {
-		return true
+		return true, nil
 	}
 
-	return false
+	return false, nil
 }
 
 func convertToSha256(s string) []byte {
