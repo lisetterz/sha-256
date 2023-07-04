@@ -46,6 +46,12 @@ The response is a json format containing the sha256 text parameter as the below 
 }
 ```
 
+In case that the string is invalid it will return an error format with a 404 Bad Request status code like below:
+```
+{
+    "Message": "the string dfrff34 is not valid"
+}
+```
 
 ## Security
 > **_NOTE:_**  For the purpose of this sample, the API is open for public to test. Later it will contain an API key that needs to be send in the an 'x-api-key' header.
