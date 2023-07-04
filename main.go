@@ -1,48 +1,48 @@
 package main
 
 import (
-	"bufio"
 	"crypto/sha256"
 	"fmt"
-	"os"
 	"regexp"
-	"strings"
+
+	"github.com/aws/aws-lambda-go/lambda"
 )
 
-//const specialChars = "/[`!@#$%^&*()_+-=[]{};':\"\\|,.<>/?~]/"
+type MyEvent struct {
+	Text string `json:"text"`
+}
 
-// var regexPattern = fmt.Sprintf("([0-9]+)([%s]+)[a-zA-Z0-9%s]{8,15}$", specialChars, specialChars)
+type MyResponse struct {
+	Sha256 string `json:"sha256"`
+}
 
-var pattern = "^(\\w|[!@#$%^&*()]){8,}$"
-var oneNumber = "\\d+"
-var oneSpecial = "[!@#$%^&*()]+"
+const specialChars = "[`!@#$%^&*()_+-=\\[\\]{};':\"\\|,.<>\\/\\?~]"
+
+var (
+	pattern    = fmt.Sprintf("^(\\w|%s){8,}$", specialChars)
+	oneNumber  = "\\d+"
+	oneSpecial = fmt.Sprintf("%s+", specialChars)
+)
 
 func main() {
 
-	fmt.Println("Welcome to the Sha256 program.\nPlease enter the string to convert:")
-
-	reader := bufio.NewReader(os.Stdin)
-	text, _ := reader.ReadString('\n')
-
-	text = strings.Replace(text, "\n", "", -1)
-
-	valid := validateString(text)
-
-	if !valid {
-		fmt.Println("The string is invalid")
-	}
-
-	sha256 := convertToSha256(text)
-
-	fmt.Printf("%x\n", sha256)
+	lambda.Start(HandleLambdaEvent)
 
 }
 
-func validateString(s string) bool {
+func HandleLambdaEvent(event MyEvent) (MyResponse, error) {
+	isValid := validateString(event.Text)
 
-	if len(s) < 8 {
-		return false
+	if !isValid {
+		return MyResponse{Sha256: ""}, fmt.Errorf("the string is not valid")
 	}
+
+	sha256 := convertToSha256(event.Text)
+
+	return MyResponse{Sha256: fmt.Sprintf("%x", sha256)}, nil
+}
+
+func validateString(s string) bool {
 
 	matched, err := regexp.MatchString(pattern, s)
 
