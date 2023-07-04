@@ -1,10 +1,15 @@
 package main
 
 import (
+	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
 	"regexp"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
@@ -26,20 +31,52 @@ var (
 
 func main() {
 
-	lambda.Start(HandleLambdaEvent)
+	lambda.Start(HandleRequest)
 
 }
 
-func HandleLambdaEvent(event MyEvent) (MyResponse, error) {
-	isValid := validateString(event.Text)
+func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	if !isValid {
-		return MyResponse{Sha256: ""}, fmt.Errorf("the string is not valid")
+	log.Printf(fmt.Sprintf("body:[%s] ", event.Body))
+
+	var myEvent MyEvent
+
+	err := json.Unmarshal([]byte(event.Body), &myEvent)
+
+	if err != nil {
+		return events.APIGatewayProxyResponse{}, err
 	}
 
-	sha256 := convertToSha256(event.Text)
+	isValid := validateString(myEvent.Text)
 
-	return MyResponse{Sha256: fmt.Sprintf("%x", sha256)}, nil
+	if !isValid {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusBadRequest,
+			Body:       "",
+		}, fmt.Errorf("the string %s from the event %s is not valid", myEvent.Text, myEvent)
+
+	}
+
+	sha256 := convertToSha256(myEvent.Text)
+
+	msg := fmt.Sprintf("%x", sha256)
+
+	responseBody := MyResponse{
+		Sha256: msg,
+	}
+
+	jbytes, err := json.Marshal(responseBody)
+
+	if err != nil {
+		return events.APIGatewayProxyResponse{}, err
+	}
+	jstr := string(jbytes)
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusOK,
+		Body:       jstr,
+	}, nil
+
 }
 
 func validateString(s string) bool {
